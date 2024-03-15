@@ -96,6 +96,7 @@ class _PuzzleScreenState extends ConsumerState<PuzzleScreen> with RouteAware {
     return Scaffold(
       appBar: AppBar(
         actions: [
+          _PuzzlesRemaining(),
           ToggleSoundButton(),
           _PuzzleSettingsButton(userId: userId),
         ],
@@ -121,6 +122,7 @@ class _PuzzleScreenState extends ConsumerState<PuzzleScreen> with RouteAware {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            _PuzzlesRemaining(),
             ToggleSoundButton(),
             _PuzzleSettingsButton(userId: userId),
           ],
@@ -546,6 +548,25 @@ class _BottomBar extends ConsumerWidget {
 
   void _moveBackward(WidgetRef ref) {
     ref.read(ctrlProvider.notifier).userPrevious();
+  }
+}
+
+class _PuzzlesRemaining extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final connectivity = ref.watch(connectivityChangesProvider);
+    return connectivity.when(
+      data: (data) => data.isOnline
+          ? const SizedBox.shrink()
+          : const BottomBarButton(
+              icon: Icons.cloud_off_sharp,
+              label: '13/50',
+              showLabel: true,
+              onTap: null,
+            ),
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
   }
 }
 
