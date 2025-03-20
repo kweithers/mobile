@@ -22,6 +22,7 @@ class Clock extends StatelessWidget {
     this.emergencyThreshold,
     this.padLeft = false,
     this.padding = const EdgeInsets.symmetric(vertical: 3.0, horizontal: 5.0),
+    this.timedOut = false,
     super.key,
   });
 
@@ -44,6 +45,9 @@ class Clock extends StatelessWidget {
   /// Padding around the clock.
   final EdgeInsets padding;
 
+  /// If `true`, the clock will use the timedOut style.
+  final bool timedOut;
+
   @override
   Widget build(BuildContext context) {
     final hours = timeLeft.inHours;
@@ -60,6 +64,24 @@ class Clock extends StatelessWidget {
     final colorScheme = ColorScheme.of(context);
     final effectiveClockStyle = clockStyle ?? ClockStyle.defaultStyle(brightness, colorScheme);
 
+    Color backgroundColor;
+    Color textColor;
+
+    if (timedOut) {
+      backgroundColor = effectiveClockStyle.timedOutBackgroundColor;
+      textColor = effectiveClockStyle.timedOutTextColor;
+    } else if (active) {
+      backgroundColor = isEmergency
+          ? effectiveClockStyle.emergencyBackgroundColor
+          : effectiveClockStyle.activeBackgroundColor;
+      textColor = isEmergency
+          ? effectiveClockStyle.emergencyTextColor
+          : effectiveClockStyle.activeTextColor;
+    } else {
+      backgroundColor = effectiveClockStyle.backgroundColor;
+      textColor = effectiveClockStyle.textColor;
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth;
@@ -68,12 +90,7 @@ class Clock extends StatelessWidget {
         return Container(
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-            color:
-                active
-                    ? isEmergency
-                        ? effectiveClockStyle.emergencyBackgroundColor
-                        : effectiveClockStyle.activeBackgroundColor
-                    : effectiveClockStyle.backgroundColor,
+            color: backgroundColor,
           ),
           child: Padding(
             padding: padding,
@@ -86,12 +103,7 @@ class Clock extends StatelessWidget {
                           ? '$hoursDisplay:${mins.toString().padLeft(2, '0')}:$secs'
                           : '$minsDisplay:$secs',
                   style: TextStyle(
-                    color:
-                        active
-                            ? isEmergency
-                                ? effectiveClockStyle.emergencyTextColor
-                                : effectiveClockStyle.activeTextColor
-                            : effectiveClockStyle.textColor,
+                    color: textColor,
                     fontSize: _kClockFontSize * fontScaleFactor,
                     height: remainingHeight < kSmallRemainingHeightLeftBoardThreshold ? 1.0 : null,
                     fontFeatures: const [FontFeature.tabularFigures()],
@@ -135,6 +147,8 @@ class ClockStyle {
   final Color backgroundColor;
   final Color activeBackgroundColor;
   final Color emergencyBackgroundColor;
+  final Color timedOutBackgroundColor;
+  final Color timedOutTextColor;
 
   factory ClockStyle.defaultStyle(Brightness brightness, ColorScheme colorScheme) => ClockStyle(
     backgroundColor: colorScheme.surface,
@@ -147,6 +161,8 @@ class ClockStyle {
             : colorScheme.onTertiaryContainer,
     emergencyBackgroundColor: colorScheme.errorContainer,
     emergencyTextColor: colorScheme.onErrorContainer,
+    timedOutBackgroundColor: colorScheme.error,
+    timedOutTextColor: colorScheme.onError,
   );
 }
 
@@ -177,6 +193,7 @@ class CountdownClockBuilder extends StatefulWidget {
     required this.builder,
     this.delay,
     this.tickInterval = const Duration(milliseconds: 100),
+    this.timedOut = false,
     super.key,
   });
 
@@ -301,3 +318,4 @@ class _CountdownClockState extends State<CountdownClockBuilder> {
     return RepaintBoundary(child: widget.builder(context, timeLeft));
   }
 }
+
