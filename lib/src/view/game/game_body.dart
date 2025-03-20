@@ -155,6 +155,7 @@ class GameBody extends ConsumerWidget {
                           active: gameState.activeClockSide == Side.black,
                           emergencyThreshold:
                               youAre == Side.black ? gameState.game.meta.clock?.emergency : null,
+                          timedOut: gameState.game.status == GameStatus.timeout && side == Side.black,
                         );
                       },
                     ),
@@ -205,6 +206,7 @@ class GameBody extends ConsumerWidget {
                           active: gameState.activeClockSide == Side.white,
                           emergencyThreshold:
                               youAre == Side.white ? gameState.game.meta.clock?.emergency : null,
+                          timedOut: gameState.game.status == GameStatus.timeout && side == Side.white,
                         );
                       },
                     ),
